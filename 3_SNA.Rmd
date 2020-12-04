@@ -1,0 +1,358 @@
+---
+title: "Introduction to social network analysis"
+author: "Naim Bro"
+subtitle: "SSRMC, University of Cambridge" 
+date: "30 January 2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+---
+
+###1. Crear redes
+- Crear redes de cero
+- Visualizar con plot() y tkplot()
+- Crear redes pre-hechas
+
+
+```{r}
+#install.packages("igraph")
+
+#cargar paquete
+library(igraph)
+```
+
+```{r}
+#crear una red de cero
+g <- graph(edges=c("Rick","Morty","Summer","Beth","Rick","Scary Terry","Rick","Birdperson","Rick","Abradolf Lincler","Rick","Beth","Rick","Summer","Morty","Beth","Morty","Summer"),directed = F)
+#Visualise
+plot(g)
+
+#otra forma de crear redes de cero
+g1 <- graph_from_literal("Rick"-"Beth":"Morty":"Scary Terry","Beth"-"Jerry":"Morty":"Summer","Morty"- "Jerry":"Summer","Scary Terry"-"Birdperson":"Squanchy","Squanchy"-"Birdperson","Abradolf Lincler")
+
+#interactive plotting
+tkplot(g1)
+```
+
+### Redes pre-hechas
+```{r}
+plot(make_full_graph(40),main="Full graph") #todos con tods
+plot(make_tree(40,children=3,mode="undirected"),main="Tree") #un árbol
+plot(make_ring(20),main="Ring") #un anillo
+plot(make_star(40),mode="undirected",main="Star") #una estrella
+plot(sample_gnm(n=50,m=40),main="Random") #Erdos-Renyi random graph
+plot(graph("zachary"),main="Karate club") #Zachary karate club
+```
+
+###2. Medidas básicas
+
+#### Examinar grafo
+```{r}
+#vertices
+V(g)
+#ejes
+E(g)
+#número de vertices
+vcount(g)
+#número de ejes
+ecount(g)
+```
+
+#### Ego medidas
+```{r}
+#grado
+degree(g)
+#Eigenvector centrality
+eigen_centrality(g)$vector
+#Betweenness
+betweenness(g)
+```
+
+#### Medidas globales
+```{r}
+#Path length
+average.path.length(g)
+#diámetro: distancia entre los nodos más distantes
+diameter(g)
+#densidad: razón entre número de ejes observado versus potencial
+graph.density(g)
+```
+
+#### Medidas intermedias
+```{r}
+#Cohesive blocks
+cohesive.blocks(g)
+#Community detection
+cluster_louvain(g)
+```
+**<span style="color:darkred"> Ejercicio 1: Crea tu propia red, plotéala y encuentra a) el nodo más central, b) el broker, y c) los subgrupos.  (15 minutos) </span>**
+
+## Ploteo (fuente: documentación igraph)
+
+NODES
+
+```vertex.color```: Node color
+
+```vertex.frame.color```: Node border color
+
+```vertex.shape```: One of "none", "circle", "square", "csquare", "rectangle" "crectangle", "vrectangle", "pie", "raster", or "sphere"
+
+```vertex.size```: Size of the node (default is 15)
+
+```vertex.size2```: The second size of the node (e.g. for a rectangle)
+
+```vertex.label```: Character vector used to label the nodes
+
+```vertex.label.family```: Font family of the label (e.g."Times", "Helvetica")
+
+```vertex.label.font```: Font: 1 plain, 2 bold, 3, italic, 4 bold italic, 5 symbol
+
+```vertex.label.cex```: Font size (multiplication factor, device-dependent)
+
+```vertex.label.dist```: Distance between the label and the vertex
+
+```vertex.label.degree```: The position of the label in relation to the vertex, where 0 right, "pi" is left, "pi/2" is below, and "-pi/2" is above
+
+EDGES
+
+```edge.color```: Edge color
+
+```edge.width```: Edge width, defaults to 1
+
+```edge.arrow.size```: Arrow size, defaults to 1
+
+```edge.arrow.width```: Arrow width, defaults to 1
+
+```edge.label.family```: Font family of the label (e.g."Times", "Helvetica") edge.label.font Font: 1 plain, 2 bold, 3, italic, 4 bold italic, 5 symbol
+
+```edge.label.cex```: Font size for edge labels
+
+```edge.curved```: Edge curvature, range 0-1 (FALSE sets it to 0, TRUE to 0.5)
+
+```arrow.mode```: Vector specifying whether edges should have arrows, possible values: 0 no arrow, 1 back, 2 forward, 3 both
+
+LAYOUTS
+
+```layout_randomly```
+
+```layout_in_circle```
+
+```layout_with_fr```: (Fruchterman-Reingold)
+
+```layout_with_kk```: (Kamada-Kawai)
+
+
+**<span style="color:darkred">Ejercicio 2. Plotea la red que hiciste en ejercicio 1 usando por lo menos cinco argumentos de la lista arriba (10 minutos).</span>**
+
+## Red de adyacencia
+1. Crear una red de adyacencia y otra de incidencia
+
+2. Función ```graph.adjacency```
+
+```{r}
+#cargar red de adyacencia
+m <- read.csv("matrix.csv",row.names = 1) #especifica que la primera columna son nombres de fila
+m <- as.matrix(m) #convertir dataframe a matriz
+g <- graph.adjacency(m, mode = "undirected") #convertir a objeto grafo; el default es direccionado
+```
+
+**<span style="color:darkred">ejercicio 3: usando los nodos y ejes de ejercicio 1, construye una red de adyacencia y construye una matriz en Excel. Luego cárgala en R y conviértala en un objeto de grafo(15 minutos).</span>**
+
+## Matriz de incidencia
+
+1. Función ```graph.incidence()``` function
+2. Proyectar grafos bipartitos
+
+```{r}
+#Cargar matriz de incidencia y convertirla a objeto de grafo
+m_inc <- read.csv("matrix_inc.csv",row.names = 1)
+m_inc[is.na(m_inc)] <- 0
+m_inc <- as.matrix(m_inc ) #convertir dataframe a matriz
+g_inc <- graph.incidence(m_inc)
+plot(g_inc, main="Red bipartite") #plotear grafo
+```
+
+```{r}
+#Plotear con color y forma según tipo de nodo
+V(g_inc)$color <- c("orange","steel blue")[V(g_inc)$type+1]
+V(g_inc)$shape <- c("circle","square")[V(g_inc)$type+1]
+plot(g_inc,vertex.size=10,main="Bipartite + colour")
+
+#convert to one-mode network (proj1 and proj2)
+g_inc_proj <- bipartite.projection(g_inc)
+plot(g_inc_proj$proj1,main="Projection 1")
+plot(g_inc_proj$proj2,main="Projection 2")
+```
+
+
+**<span style="color:darkred">Ejercicio 4: construye una matriz de incidencia en Excel, cárgala en r, y plotéala usando colores y formas(10-15 minutes).</span>**
+
+## Glasgow teenage study
+
+"Teenage Friends and Lifestyle Study" (Bush, West & Michell 1997, Michell and West 1996, Pearson and Michell 2000, Pearson and West 2003)
+
+1. Cargar archivos RData
+2. Asignar atributos a nodos y ejes
+3. Encontrar modularidad
+4. Medir asortividad
+
+```{r}
+#cargar datos en formato R
+load("Glasgow-friendship.RData")
+load("Glasgow-demographic.RData")
+load("Glasgow-substances.RData")
+
+#Crear el grafo
+friendship.1[is.na(friendship.1)]<-0 #convertir NAs a ceros
+friendship.1 <- as.matrix(friendship.1) #convertir a matriz
+friendship.1 = ifelse(friendship.1==10,0, friendship.1) #cambiar pesos
+friendship.1 = ifelse(friendship.1==1,6,friendship.1) #cambiar pesos
+friendship.1 = ifelse(friendship.1==2,1,friendship.1) #cambiar pesos
+g <- graph.adjacency(friendship.1,mode = "undirected",weighted = T,diag=F)
+E(g)$width <- E(g)$weight #peso de ejes igual peso
+plot(g,vertex.size=8,weighted=T,vertex.label=NA,main="Glasgow friendship")
+```
+
+```{r}
+#distinguir género (1 = hombres, 2 = mujeres)
+sex.F <- as.data.frame(sex.F)
+V(g)$sex <- sex.F$sex.F[match(V(g)$name, rownames(sex.F))]
+sex_color <- V(g)$sex
+sex_color[sex_color == 2] <- "red"   #mujeres
+sex_color[sex_color == 1] <- "blue"  #hombres
+plot(g, vertex.size=8, vertex.label=NA,edge.arrow.size=.05,vertex.color=sex_color,main="Glasgow género")
+```
+
+```{r}
+#calcular centralidad
+degree.F <- degree(g)
+Eigen.F <- eigen_centrality(g)$vector
+l <- layout_with_fr(g)
+plot(g, vertex.color = sex_color, vertex.size = degree.F, vertex.label = NA, layout = l, main = "Degree")
+plot(g, vertex.color = sex_color, vertex.size = Eigen.F*20, vertex.label = NA, layout = l, main = "Eigenvector")
+```
+
+```{r}
+#medir modularidad en mujeres y hombres
+modularity(cluster_louvain(g)) #modularidad de toda la red
+modularity(cluster_louvain(induced.subgraph(g,sex.F$sex==1))) #modularidad entre hombres
+modularity(cluster_louvain(induced.subgraph(g,sex.F$sex==2))) #modularidad entre mujeres
+
+#Medir asortividad entre mujeres y hombres
+assortativity.nominal(g,types = V(g)$sex) #hombres y mujeres no se mesclan mucho (valor alto de homofilia)
+```
+
+## Detectando comunidades
+
+```{r}
+#Genera grafo en base al club de karate de Zachary
+Zachary <- graph("zachary") #Zachary (1976)
+
+l <- layout_with_fr(Zachary)
+
+#Encuentra comunidades usando distintos algoritmos
+
+#Girvan-Newman (lento)
+#Bueno para redes simples, independiente de tamaño
+#En grafos grandes y ruidosos sobreestima el número de comunidades
+plot(cluster_edge_betweenness(Zachary),Zachary, layout = l,main="Girvan-Newman")
+
+#Label propagation. Rápido. Bueno para distintos tamaños, pero para redes simples
+#Subestima el número de comunidades en redes ruidosas
+plot(cluster_label_prop(Zachary),Zachary,layout = l,main="Label Propagation")
+
+#Louvain (o multilevel). Rápido. Subestima el número de comunidades en redes grandes y ruidosas
+plot(cluster_louvain(Zachary),Zachary,layout = l,main="Louvain")
+
+#Fast greedy. Subestima el número de comunidades y deteriora con redes de más de mil, especialmetne las ruidosas
+plot(cluster_fast_greedy(Zachary),Zachary,layout = l,main="Fastgreedy")
+
+#Infomap. Identifica comunidades bien en redes simple < 1,000.
+plot(cluster_infomap(Zachary),Zachary,layout = l,main="Infomap")
+
+#Walktrap. En redes simples, encuentro número correcto de comunidades, independiente del tamaño
+plot(cluster_walktrap(Zachary),Zachary,layout = l,main="Walktrap")
+
+#Leading eigenvector. Sobreestima número de comunidades en redes pequeñas, especialmente las ruidosas
+#Subestima comunidades en redes grandes
+plot(cluster_leading_eigen(Zachary),Zachary,layout = l,main="Leading Eigen")
+
+#Spinglass (muy lento). Sobre estima comunidades en redes simples, especialmente las grandes
+plot(cluster_spinglass(Zachary),Zachary,layout = l,main="Spinglass")
+```
+
+## Elite chilena del siglo XIX
+
+```{r}
+#cargar y convertir en grafo
+m <- read.csv("Chile_core.csv",row.names = 1) #cargar como dataframe
+m <- as.matrix(m) #convertir a matriz
+g <- graph.adjacency(m, weighted = T, mode = "undirected") # convertir a grafo
+
+#Elegir el camino más corto entre los siguientes individuos
+shortest_paths(g, "Irarrazaval.Larrain.Manuel.Jose", "Errazuriz.Zanartu.Federico")
+```
+
+```{r}
+#Encuentra nodos con más de 25 conecciones
+degree(g)[degree(g)>25]
+```
+
+```{r}
+#detección de comunidades
+g_GN <- cluster_louvain(g) 
+length(g_GN) #cuántos clusters?
+g_GN[[1]] #inspeccionar cluster 1
+
+#Plotear ego red
+plot(induced_subgraph(g, ego(g, 1, "Errazuriz.Zanartu.Federico")[[1]]), edge.width = E(g)$weight, main = "Federico Errazuriz Zanartu")
+```
+
+```{r}
+#plot clusters
+plot(induced.subgraph(g, membership(g_GN) == 5), edge.width = E(g)$weight, main = "Cluster 5") #plotear cluster 5
+plot(g_GN, g, vertex.label = NA, vertex.size = degree(g)*0.5, edge.color = "transparent", main = "Family clusters") 
+```
+
+```{r}
+V(g)$color <- "white"
+V(g)[membership(g_GN) == membership(g_GN)["Errazuriz.Zanartu.Federico"]]$color <- "darkred" #choose cluster and assign colour
+plot(g, vertex.size = 5, vertex.label = NA, main = "Highlight Errazuriz cluster") #plot with chosen cluster highlighted 
+```
+
+
+Ejercicio 6: En junio de 1891, Chile está en el medio de una guerra civil; el papa te manda a que encuentres un mediador para ayudar a negociar un acuerdo de paz. El papa de hace entrega de 1 000 000 de pesos chilenos, lo suficiente para pagar a cinco políticos en tu apuesta. A quiénes eliges? (15 mins)
+
+##Bibliografía
+
+Bush, H., P. West, and L. Michell (1997). The role of friendship groups in the uptake and maintenance of smoking amongst pre-adolescent and adolescent children: Distribution of Frequencies. Working Paper No. 62. MRC Medical Sociology Unit Glasgow.
+
+Burt, Burt (2004), Structural Holes and Good Ideas. American Journal of Sociology.
+
+Christakis, Nicholas & James Fowler (2009), Connected. The amazing power of social networks and how they shape our lives. Hammer Press, London.
+
+Fowler, James (2006), Connecting the Congress: A Study of Cosponsorship Networks. Political Analysis.
+
+Mizruchi, Mark (2013), The fracturing of the American corporate elite, Harvard University Press.
+
+Padgett, John & Cristopher Ansell (1993), Robust Action and the Rise of the Medici, 1400-1434. American Journal of Sociology.
+
+Watts, Duncan (2004), Six degrees. The science of a connected age. Vintage, London.
+
+Yang, Z. et al (2016). A Comparative Analysis of Community Detection Algorithms on Artificial Networks. Sci. Rep. 6, 30750; doi: 10.1038/srep30750.
+
+Zachary, W. (1977). An Information Flow Model for Conflict and Fission in Small Groups. Journal of Anthropological Research,33(4), 452-473.
+
+## Datos de red
+
+ICPSR: https://www.icpsr.umich.edu/icpsrweb/index.jsp
+
+US Congress Cosponsorship data: http://fowler.ucsd.edu/cosponsorship.htm
+
+Stanford Large Network Dataset Collection: https://snap.stanford.edu/data/
+
+Citation networks: https://aminer.org/citation
+
+National Longitudinal Survey of Adolescent Health (Add Health): http://www.cpc.unc.edu/projects/addhealth
