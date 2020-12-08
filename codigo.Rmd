@@ -1,0 +1,35 @@
+---
+title: "Preparacion de Datos"
+author: "Astete, Gálvez, González"
+date: "08-12-2020"
+output: html_document
+---
+
+```{r}
+#Librerías
+library(dplyr)
+library(sf)
+library(ggplot2)
+
+#Cargar base de datos contagios COVID-19
+covid = read.csv("covid19.csv")
+metropolitana = covid  %>%  filter(Region == "Metropolitana")
+
+
+#Shapefiles Comunas
+df <- st_read("comunas.shp")
+dfmetropolitana = df %>% filter(Region == "Región Metropolitana de Santiago")
+dfmetropolitana$Comuna <- chartr('áéíóúñÑ', 'aeiounN', dfmetropolitana$Comuna)
+dfmetropolitana$Region <- replace(dfmetropolitana$Region,dfmetropolitana$Region== "Región Metropolitana de Santiago", "Metropolitana")
+
+#Union BBDD
+rm = left_join(dfmetropolitana, metropolitana)
+rm = rename(rm, "41220" = X44169)
+
+#Gráfico Mapa de contagios por comuna
+ggplot(rm)  + geom_sf(aes(fill = 41220, geometry = geometry))
+       
+
+       
+```
+
