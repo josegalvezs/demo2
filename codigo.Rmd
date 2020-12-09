@@ -24,12 +24,18 @@ dfmetropolitana$Region <- replace(dfmetropolitana$Region,dfmetropolitana$Region=
 
 #Union BBDD
 rm = left_join(dfmetropolitana, metropolitana)
-rm = rename(rm, "41220" = X44169)
+rm = rename(rm, "Casos" = X44169)
+
+#filtrado a provincia de santiago
+
+provinciasantiago <- c("Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina","Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Santiago", "Vitacura")
+provinciasantiago <- chartr("ÁÉÍÓÚáéíóúÑñ", "AEIOUaeiouNn", provinciasantiago)
+
+
+rm <- rm %>% filter(Comuna %in% provinciasantiago)
+
 
 #Gráfico Mapa de contagios por comuna
-ggplot(rm)  + geom_sf(aes(fill = 41220, geometry = geometry))
-       
-
-       
+ggplot(rm)  + geom_sf(aes(fill = Casos)) + scale_fill_gradientn(colors = viridis::viridis(20)) 
 ```
 
