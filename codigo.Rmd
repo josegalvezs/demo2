@@ -1,12 +1,14 @@
 ---
-title: "Preparacion de Datos"
+title: "Demo 2"
 author: "Astete, Gálvez, González"
 date: "08-12-2020"
 output: html_document
 ---
 
-```{r}
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+
 #Librerías
+
 library(dplyr)
 library(sf)
 library(ggplot2)
@@ -36,6 +38,8 @@ rm <- rm %>% filter(Comuna %in% provinciasantiago)
 
 
 #Gráfico Mapa de contagios por comuna
-ggplot(rm)  + geom_sf(aes(fill = Casos)) + scale_fill_gradientn(colors = viridis::viridis(20)) 
+ggplot(rm)  + geom_sf(aes(fill = Casos)) + scale_fill_gradientn(colors = viridis::viridis(20)) +  xlab("Longitud") + ylab("Latitud") +
+  ggtitle("Provincia de Santiago",
+          subtitle = "Elaboraci{on propia a partir de datos de ") 
 ```
 
